@@ -1,0 +1,130 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    font-family: 'Inter', sans-serif;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-[#f9fafe] dark:bg-[#0f1117] text-gray-900 dark:text-gray-100 transition-colors duration-200;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400 dark:bg-gray-500;
+  }
+}
+
+@layer utilities {
+  .prompt::-webkit-scrollbar { width: 5px; }
+  .prompt::-webkit-scrollbar-thumb {
+    background-color: #666e75;
+    border-radius: 5px;
+  }
+
+  .glass {
+    @apply bg-white/80 dark:bg-gray-900/80 backdrop-blur-md;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-cardhover;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-[#6469ff] to-[#8b5cf6] bg-clip-text text-transparent;
+  }
+
+  .input-base {
+    @apply bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600
+    text-gray-900 dark:text-gray-100 text-sm rounded-xl
+    focus:ring-2 focus:ring-[#6469ff] focus:border-transparent
+    outline-none block w-full p-3 transition-all duration-200
+    placeholder:text-gray-400 dark:placeholder:text-gray-500;
+  }
+
+  .btn-primary {
+    @apply bg-gradient-to-r from-[#6469ff] to-[#8b5cf6]
+    hover:from-[#4f54d6] hover:to-[#7c3aed]
+    text-white font-semibold rounded-xl px-6 py-2.5
+    transition-all duration-200 shadow-lg hover:shadow-xl
+    active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+    text-gray-700 dark:text-gray-300 font-semibold rounded-xl px-6 py-2.5
+    hover:bg-gray-50 dark:hover:bg-gray-700
+    transition-all duration-200 active:scale-[0.98];
+  }
+
+  .card-base {
+    @apply bg-white dark:bg-gray-800 rounded-2xl shadow-card dark:shadow-card-dark
+    border border-gray-100 dark:border-gray-700;
+  }
+}
+
+/* Masonry grid spans */
+@media screen and (min-width: 480px) {
+  .card:nth-child(7n + 1) {
+    grid-column: auto / span 2;
+    grid-row: auto / span 2;
+  }
+}
+
+/* Shimmer loading effect */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+.dark .shimmer {
+  background: linear-gradient(90deg, #1f2937 25%, #374151 50%, #1f2937 75%);
+  background-size: 200% 100%;
+}
+
+/* Render cold-start loader */
+@keyframes morphing {
+  0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+}
+.morphing {
+  animation: morphing 4s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+.floating { animation: float 3s ease-in-out infinite; }
+
+/* Toast animations */
+@keyframes slideInRight {
+  from { transform: translateX(110%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes slideOutRight {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(110%); opacity: 0; }
+}
+.toast-enter { animation: slideInRight 0.35s ease-out forwards; }
+.toast-exit { animation: slideOutRight 0.3s ease-in forwards; }
