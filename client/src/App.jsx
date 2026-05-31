@@ -7,14 +7,29 @@ import { Navbar, RenderLoader } from './components';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Home, CreatePost, MyCreations, Login, Signup, ForgotPassword, AuthCallback } from './pages';
 import useServerHealth from './hooks/useServerHealth';
+import { PromptBotProvider } from './context/PromptBotContext';
 
 const AppShell = () => {
   const serverStatus = useServerHealth();
+
+  // 'pending': waiting for first health response — show nothing (prevents flash)
+  // 'cold': server is sleeping — show loader
+  // 'ready': server is up — show app
+  if (serverStatus === 'pending') {
+    // Blank screen for up to 4s (fast on warm server, user sees nothing before loader)
+    return (
+      <div style={{
+        position: 'fixed', inset: 0,
+        background: 'linear-gradient(135deg,#0f1117,#1a1a2e)',
+      }} />
+    );
+  }
 
   if (serverStatus === 'cold') {
     return <RenderLoader />;
   }
 
+  // Server is ready — show the full app
   return (
     <BrowserRouter>
       <Navbar />
@@ -44,9 +59,11 @@ const AppShell = () => {
 const App = () => (
   <ThemeProvider>
     <AuthProvider>
-      <ToastProvider>
-        <AppShell />
-      </ToastProvider>
+      <PromptBotProvider>
+        <ToastProvider>
+          <AppShell />
+        </ToastProvider>
+      </PromptBotProvider>
     </AuthProvider>
   </ThemeProvider>
 );

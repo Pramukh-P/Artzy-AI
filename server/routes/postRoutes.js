@@ -13,6 +13,19 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// Helper to format post with like info
+const formatPost = (post, currentUserId) => {
+  const obj = post.toObject ? post.toObject() : post;
+  return {
+    ...obj,
+    likeCount: obj.likes ? obj.likes.length : 0,
+    likedByMe: currentUserId
+      ? (obj.likes || []).some((id) => id.toString() === currentUserId.toString())
+      : false,
+    likes: undefined, // don't expose full likes array
+  };
+};
+
 // ─── GET COMMUNITY (PUBLIC) POSTS ─────────────────────────────────────────────
 router.get('/', async (req, res) => {
   try {
@@ -26,31 +39,55 @@ router.get('/', async (req, res) => {
       ];
     }
 
-    let sortObj = { createdAt: -1 }; // default: latest
+    let sortObj = { createdAt: -1 };
     if (sort === 'oldest') sortObj = { createdAt: 1 };
     if (sort === 'a-z') sortObj = { name: 1 };
     if (sort === 'z-a') sortObj = { name: -1 };
+    if (sort === 'most-liked') sortObj = { likesCount: -1, createdAt: -1 };
 
-    const posts = await Post.find(query).sort(sortObj).select('-userId');
-    res.status(200).json({ success: true, data: posts });
+    // For most-liked, we need aggregate
+    let posts;
+    if (sort === 'most-liked') {
+      posts = await Post.aggregate([
+        { $match: query },
+        { $addFields: { likesCount: { $size: { $ifNull: ['$likes', []] } } } },
+        { $sort: { likesCount: -1, createdAt: -1 } },
+      ]);
+      // aggregate returns plain objects
+      return res.status(200).json({
+        success: true,
+        data: posts.map((p) => ({
+          ...p,
+          likeCount: p.likesCount,
+          likedByMe: false,
+          likes: undefined,
+        })),
+      });
+    }
+
+    posts = await Post.find(query).sort(sortObj);
+    res.status(200).json({
+      success: true,
+      data: posts.map((p) => formatPost(p, null)),
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
 
-// ─── GET SINGLE POST (PUBLIC) ─────────────────────────────────────────────────
-router.get('/:id', async (req, res) => {
+// ─── GET SINGLE PUBLIC POST ───────────────────────────────────────────────────
+router.get('/public/:id', async (req, res) => {
   try {
     const post = await Post.findOne({ _id: req.params.id, isPublic: true });
     if (!post) return res.status(404).json({ success: false, message: 'Post not found' });
-    res.status(200).json({ success: true, data: post });
+    res.status(200).json({ success: true, data: formatPost(post, null) });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 });
 
-// ─── CREATE POST (PRIVATE) ───────────────────────────────────────────────────
+// ─── CREATE POST ─────────────────────────────────────────────────────────────
 router.post('/', authMiddleware, async (req, res) => {
   try {
     const { prompt, photo, isPublic = false } = req.body;
@@ -58,7 +95,6 @@ router.post('/', authMiddleware, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Prompt and photo are required' });
     }
 
-    // Upload to Cloudinary
     const uploadResult = await cloudinary.uploader.upload(photo, {
       folder: 'artzy-ai',
       resource_type: 'image',
@@ -70,9 +106,10 @@ router.post('/', authMiddleware, async (req, res) => {
       prompt,
       photo: uploadResult.secure_url,
       isPublic,
+      likes: [],
     });
 
-    res.status(201).json({ success: true, data: newPost });
+    res.status(201).json({ success: true, data: formatPost(newPost, req.user._id) });
   } catch (error) {
     console.error('Create post error:', error);
     res.status(500).json({ success: false, message: 'Failed to save post' });
@@ -82,19 +119,49 @@ router.post('/', authMiddleware, async (req, res) => {
 // ─── GET MY POSTS ─────────────────────────────────────────────────────────────
 router.get('/user/my', authMiddleware, async (req, res) => {
   try {
-    const { filter } = req.query; // 'all' | 'shared' | 'private'
+    const { filter } = req.query;
     let query = { userId: req.user._id };
     if (filter === 'shared') query.isPublic = true;
     if (filter === 'private') query.isPublic = false;
 
     const posts = await Post.find(query).sort({ createdAt: -1 });
-    res.status(200).json({ success: true, data: posts });
+    res.status(200).json({
+      success: true,
+      data: posts.map((p) => formatPost(p, req.user._id)),
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 });
 
-// ─── TOGGLE SHARE TO COMMUNITY ────────────────────────────────────────────────
+// ─── TOGGLE LIKE ──────────────────────────────────────────────────────────────
+router.patch('/:id/like', authMiddleware, async (req, res) => {
+  try {
+    const post = await Post.findOne({ _id: req.params.id, isPublic: true });
+    if (!post) return res.status(404).json({ success: false, message: 'Post not found' });
+
+    const userId = req.user._id;
+    const alreadyLiked = post.likes.some((id) => id.toString() === userId.toString());
+
+    if (alreadyLiked) {
+      post.likes = post.likes.filter((id) => id.toString() !== userId.toString());
+    } else {
+      post.likes.push(userId);
+    }
+
+    await post.save();
+
+    res.status(200).json({
+      success: true,
+      likeCount: post.likes.length,
+      likedByMe: !alreadyLiked,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ─── TOGGLE SHARE ─────────────────────────────────────────────────────────────
 router.patch('/:id/share', authMiddleware, async (req, res) => {
   try {
     const post = await Post.findOne({ _id: req.params.id, userId: req.user._id });
@@ -103,7 +170,7 @@ router.patch('/:id/share', authMiddleware, async (req, res) => {
     post.isPublic = !post.isPublic;
     await post.save();
 
-    res.status(200).json({ success: true, data: post, isPublic: post.isPublic });
+    res.status(200).json({ success: true, data: formatPost(post, req.user._id), isPublic: post.isPublic });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -115,7 +182,6 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     const post = await Post.findOne({ _id: req.params.id, userId: req.user._id });
     if (!post) return res.status(404).json({ success: false, message: 'Post not found' });
 
-    // Delete from Cloudinary
     const publicId = post.photo.split('/').slice(-2).join('/').replace(/\.[^/.]+$/, '');
     try {
       await cloudinary.uploader.destroy(publicId);

@@ -1,33 +1,38 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Card, Loader } from '../components';
+import { useToast } from '../context/ToastContext';
+import { Card, Loader, PromptBot } from '../components';
 import apiFetch from '../utils/api';
 
 const SORT_OPTIONS = [
-  { value: 'latest', label: '🕒 Latest' },
-  { value: 'oldest', label: '📅 Oldest' },
-  { value: 'a-z', label: '🔤 A-Z' },
-  { value: 'z-a', label: '🔤 Z-A' },
+  { value: 'latest',     label: '🕒 Latest' },
+  { value: 'most-liked', label: '❤️ Most Liked' },
+  { value: 'oldest',     label: '📅 Oldest' },
+  { value: 'a-z',        label: '🔤 A–Z' },
 ];
 
 const SkeletonCard = () => (
-  <div className="rounded-2xl overflow-hidden">
-    <div className="shimmer aspect-square rounded-2xl" />
-  </div>
+  <div className="shimmer" style={{ borderRadius: 16, aspectRatio: '1/1' }} />
 );
 
 const Home = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, token } = useAuth();
+  const { addToast } = useToast();
+  const [searchParams] = useSearchParams();
+  const highlightId = searchParams.get('highlight');
+
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [sort, setSort] = useState('latest');
+  const [highlightedPost, setHighlightedPost] = useState(null);
+  const highlightTimer = useRef(null);
 
   // Debounce search
   useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearch(searchText), 400);
+    const t = setTimeout(() => setDebouncedSearch(searchText), 420);
     return () => clearTimeout(t);
   }, [searchText]);
 
@@ -38,8 +43,8 @@ const Home = () => {
       if (debouncedSearch) params.append('search', debouncedSearch);
       const data = await apiFetch(`/post?${params}`);
       setPosts(data.data || []);
-    } catch (err) {
-      console.error(err);
+    } catch {
+      addToast('Failed to load posts', 'error');
     } finally {
       setLoading(false);
     }
@@ -47,8 +52,55 @@ const Home = () => {
 
   useEffect(() => { fetchPosts(); }, [fetchPosts]);
 
+  // Handle highlight from share link — scroll to card and highlight for 3-4s
+  useEffect(() => {
+    if (!highlightId || loading) return;
+
+    const el = document.getElementById(`post-${highlightId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setHighlightedPost(highlightId);
+      clearTimeout(highlightTimer.current);
+      highlightTimer.current = setTimeout(() => setHighlightedPost(null), 3500);
+    } else {
+      // Post might not be in the list if search/sort is active — fetch it
+      setSort('latest');
+      setSearchText('');
+      setTimeout(() => {
+        const el2 = document.getElementById(`post-${highlightId}`);
+        if (el2) {
+          el2.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setHighlightedPost(highlightId);
+          highlightTimer.current = setTimeout(() => setHighlightedPost(null), 3500);
+        }
+      }, 800);
+    }
+
+    return () => clearTimeout(highlightTimer.current);
+  }, [highlightId, loading]);
+
+  const handleLike = async (postId) => {
+    if (!isAuthenticated) {
+      addToast('Login to like images ❤️', 'info');
+      return null;
+    }
+    try {
+      const data = await apiFetch(`/post/${postId}/like`, { method: 'PATCH' }, token);
+      // Update local state
+      setPosts((prev) => prev.map((p) =>
+        p._id === postId
+          ? { ...p, likeCount: data.likeCount, likedByMe: data.likedByMe }
+          : p
+      ));
+      return data;
+    } catch {
+      addToast('Failed to like', 'error');
+      return null;
+    }
+  };
+
   return (
-    <div className="min-h-screen pt-20 pb-12">
+    <div className="min-h-screen pt-20 pb-12 bg-[#f9fafe] dark:bg-[#0f1117]">
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
 
         {/* Hero */}
@@ -61,7 +113,7 @@ const Home = () => {
             <span className="gradient-text">Showcase</span>
           </h1>
           <p className="text-gray-500 dark:text-gray-400 text-lg max-w-xl mx-auto mb-6">
-            Explore stunning AI-generated artwork from our community. Browse, download, and get inspired.
+            Explore stunning AI-generated artwork. Browse, like, and download.
           </p>
 
           {!isAuthenticated ? (
@@ -69,9 +121,7 @@ const Home = () => {
               <Link to="/signup" className="btn-primary px-8 py-3 text-base">
                 🚀 Start Creating Free
               </Link>
-              <Link to="/login" className="btn-secondary px-8 py-3 text-base">
-                Sign In
-              </Link>
+              <Link to="/login" className="btn-secondary px-8 py-3 text-base">Sign In</Link>
             </div>
           ) : (
             <Link to="/create-post" className="btn-primary px-8 py-3 text-base inline-flex items-center gap-2">
@@ -80,24 +130,32 @@ const Home = () => {
           )}
         </div>
 
-        {/* Search & Filter bar */}
+        {/* Search & Filter */}
         <div className="flex flex-col sm:flex-row gap-3 mb-8 max-w-3xl mx-auto">
           <div className="relative flex-1">
+            <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+              fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
             <input
               type="text"
-              placeholder="Search by prompt or creator name…"
+              placeholder="Search by prompt or creator…"
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               className="input-base pl-10"
             />
             {searchText && (
-              <button onClick={() => setSearchText('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-lg leading-none">×</button>
+              <button onClick={() => setSearchText('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xl leading-none">
+                ×
+              </button>
             )}
           </div>
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value)}
-            className="input-base sm:w-40 cursor-pointer"
+            className="input-base sm:w-44 cursor-pointer"
           >
             {SORT_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>{o.label}</option>
@@ -105,7 +163,7 @@ const Home = () => {
           </select>
         </div>
 
-        {/* Results header */}
+        {/* Search result info */}
         {debouncedSearch && !loading && (
           <div className="mb-4 flex items-center gap-2">
             <span className="text-gray-500 dark:text-gray-400 text-sm">
@@ -130,7 +188,7 @@ const Home = () => {
             <p className="text-gray-500 dark:text-gray-400 max-w-sm mb-6">
               {debouncedSearch
                 ? 'Try a different search term'
-                : 'Be the first to share your AI-generated art with the community!'}
+                : 'Be the first to share your AI art with the community!'}
             </p>
             {!debouncedSearch && (
               <Link to={isAuthenticated ? '/create-post' : '/signup'} className="btn-primary">
@@ -146,18 +204,22 @@ const Home = () => {
                 {...post}
                 showShare
                 showDownload
+                onLike={handleLike}
+                highlighted={highlightedPost === post._id}
               />
             ))}
           </div>
         )}
 
-        {/* Stats footer */}
         {!loading && posts.length > 0 && (
           <div className="mt-10 text-center text-sm text-gray-400 dark:text-gray-500">
-            Showing {posts.length} community creation{posts.length !== 1 ? 's' : ''}
+            {posts.length} community creation{posts.length !== 1 ? 's' : ''}
           </div>
         )}
       </div>
+
+      {/* Prompt Bot — available on home page */}
+      <PromptBot onUsePrompt={null} />
     </div>
   );
 };

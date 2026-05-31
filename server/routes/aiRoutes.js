@@ -3,15 +3,14 @@ import * as dotenv from 'dotenv';
 import { InferenceClient } from '@huggingface/inference';
 import authMiddleware from '../middleware/auth.js';
 import { checkAndUpdateQuota } from '../utils/quota.js';
+import { checkContent, BLOCK_MESSAGE } from '../utils/contentFilter.js';
 import User from '../mongodb/models/user.js';
 
 dotenv.config();
 const router = express.Router();
 const client = new InferenceClient(process.env.HF_TOKEN);
 
-router.get('/', (req, res) => {
-  res.send('HuggingFace AI Route Working');
-});
+router.get('/', (req, res) => res.send('HuggingFace AI Route Working'));
 
 router.post('/', authMiddleware, async (req, res) => {
   try {
@@ -20,11 +19,19 @@ router.post('/', authMiddleware, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Prompt is required' });
     }
 
-    // Re-fetch user to get latest quota state
-    const user = await User.findById(req.user._id);
+    // Content moderation check
+    const contentCheck = checkContent(prompt);
+    if (contentCheck.blocked) {
+      return res.status(400).json({
+        success: false,
+        message: BLOCK_MESSAGE,
+        blocked: true,
+      });
+    }
 
-    // Check/reset weekly quota
+    const user = await User.findById(req.user._id);
     const quotaResult = checkAndUpdateQuota(user);
+
     if (!quotaResult.allowed) {
       return res.status(429).json({
         success: false,
@@ -34,7 +41,6 @@ router.post('/', authMiddleware, async (req, res) => {
       });
     }
 
-    // Increment before generation (prevents race conditions)
     user.imagesThisWeek += 1;
     await user.save();
 
@@ -42,7 +48,7 @@ router.post('/', authMiddleware, async (req, res) => {
       const image = await client.textToImage({
         model: 'stabilityai/stable-diffusion-xl-base-1.0',
         inputs: prompt,
-        parameters: { negative_prompt: 'blurry, bad quality, low resolution' },
+        parameters: { negative_prompt: 'blurry, bad quality, low resolution, nsfw, explicit' },
       });
 
       const arrayBuffer = await image.arrayBuffer();
@@ -54,7 +60,6 @@ router.post('/', authMiddleware, async (req, res) => {
         remaining: quotaResult.remaining - 1,
       });
     } catch (genError) {
-      // Rollback quota on generation failure
       user.imagesThisWeek = Math.max(0, user.imagesThisWeek - 1);
       await user.save();
       throw genError;
@@ -65,12 +70,10 @@ router.post('/', authMiddleware, async (req, res) => {
   }
 });
 
-// Get current user's quota status
 router.get('/quota', authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     const quotaResult = checkAndUpdateQuota(user);
-    // Save if week was reset
     await user.save();
     res.status(200).json({
       success: true,

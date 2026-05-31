@@ -1,54 +1,72 @@
 import { useState, useEffect, useRef } from 'react';
 
 const HEALTH_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/health`;
-const TIMEOUT_MS = 5000; // If health check takes > 5s, show cold start loader
-const MAX_WAIT_MS = 90000; // Give up after 90s
+const COLD_START_THRESHOLD_MS = 4000; // If no response in 4s → cold start
+const MAX_WAIT_MS = 120000; // 2 min max
 
+/**
+ * Returns: 'pending' | 'cold' | 'ready'
+ *
+ * Strategy:
+ * - Do a quick health check immediately on mount (before showing any page content)
+ * - If response comes back fast (< 4s) → status = 'ready' immediately, no loader shown
+ * - If response is slow or times out → status = 'cold', show loader until server responds
+ * - This prevents the jarring "page loads then loader appears" issue
+ */
 const useServerHealth = () => {
-  const [status, setStatus] = useState('checking'); // 'checking' | 'cold' | 'ready'
-  const startTime = useRef(Date.now());
+  const [status, setStatus] = useState('pending');
+  const startRef = useRef(Date.now());
+  const doneRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
-    let timer;
 
-    // Show cold-start loader if initial check takes > 5s
-    timer = setTimeout(() => {
-      if (!cancelled && status === 'checking') setStatus('cold');
-    }, TIMEOUT_MS);
+    // Show cold-start loader if initial ping takes > COLD_START_THRESHOLD_MS
+    const coldTimer = setTimeout(() => {
+      if (!cancelled && !doneRef.current) {
+        setStatus('cold');
+      }
+    }, COLD_START_THRESHOLD_MS);
 
-    const ping = async () => {
+    const pingServer = async () => {
       while (!cancelled) {
         try {
           const controller = new AbortController();
-          const t = setTimeout(() => controller.abort(), 8000);
+          const timeout = setTimeout(() => controller.abort(), 10000);
           const res = await fetch(HEALTH_URL, { signal: controller.signal });
-          clearTimeout(t);
+          clearTimeout(timeout);
+
           if (res.ok) {
-            clearTimeout(timer);
+            clearTimeout(coldTimer);
+            doneRef.current = true;
             if (!cancelled) setStatus('ready');
             return;
           }
         } catch {
-          // Retry
+          // Server still sleeping, retry
         }
-        if (Date.now() - startTime.current > MAX_WAIT_MS) {
-          if (!cancelled) setStatus('ready'); // Give up, let them try
+
+        // Give up after max wait
+        if (Date.now() - startRef.current > MAX_WAIT_MS) {
+          clearTimeout(coldTimer);
+          if (!cancelled) setStatus('ready');
           return;
         }
-        await new Promise((r) => setTimeout(r, 3000));
+
+        // Wait before next ping
+        await new Promise((r) => setTimeout(r, 3500));
       }
     };
 
-    ping();
+    pingServer();
 
     return () => {
       cancelled = true;
-      clearTimeout(timer);
+      clearTimeout(coldTimer);
     };
   }, []);
 
-  return status;
+  return status; // 'pending' | 'cold' | 'ready'
 };
 
 export default useServerHealth;

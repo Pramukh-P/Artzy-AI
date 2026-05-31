@@ -33,6 +33,8 @@ export const AuthProvider = ({ children }) => {
   const logout = useCallback(() => {
     localStorage.removeItem('artzy_token');
     localStorage.removeItem('artzy_user');
+    localStorage.removeItem('artzyBotChat');
+    
     setToken(null);
     setUser(null);
   }, []);

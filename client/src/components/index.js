@@ -7,3 +7,4 @@ export { default as GoogleButton } from './GoogleButton';
 export { default as OTPInput } from './OTPInput';
 export { default as QuotaBadge } from './QuotaBadge';
 export { default as RenderLoader } from './RenderLoader';
+export { default as PromptBot } from './PromptBot';
