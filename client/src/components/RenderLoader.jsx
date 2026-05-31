@@ -139,7 +139,7 @@ const RenderLoader = () => {
 
       {/* ── VIDEO (Loader.mp4) ── */}
       <div style={{
-        width: '100%', maxWidth: 560,
+        width: '90%', maxWidth: 560,
         borderRadius: 24,
         overflow: 'hidden',
         boxShadow: '0 20px 60px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.05)',

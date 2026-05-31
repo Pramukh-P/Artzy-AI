@@ -3,6 +3,7 @@ import apiFetch from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { usePromptBot } from '../context/PromptBotContext';
 import { useNavigate } from 'react-router-dom';
+import artzyBot from '../assets/artzy-bot.png';
 
 // Speech bubbles that pop up periodically
 const SPEECH_BUBBLES = [
@@ -40,55 +41,7 @@ const TypingIndicator = () => (
 );
 
 // Mini robot SVG for floating widget
-const RobotAvatar = ({ size = 52, celebrating = false }) => (
-  <svg viewBox="0 0 80 90" style={{ width: size, height: 'auto' }}>
-    <defs>
-      <linearGradient id="bodyG" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#F9FAFB" />
-        <stop offset="100%" stopColor="#E5E7EB" />
-      </linearGradient>
-      <linearGradient id="brushG2" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#F97316" />
-        <stop offset="100%" stopColor="#EC4899" />
-      </linearGradient>
-    </defs>
-    {/* Body */}
-    <rect x="16" y="46" width="48" height="38" rx="13" fill="url(#bodyG)" />
-    {/* Body detail */}
-    <circle cx="28" cy="58" r="3" fill="#D1D5DB" />
-    <circle cx="40" cy="58" r="3" fill="#D1D5DB" />
-    <circle cx="52" cy="58" r="3" fill="#D1D5DB" />
-    <rect x="20" y="68" width="40" height="5" rx="2.5" fill="rgba(139,92,246,.2)" />
-    {/* Arms */}
-    <rect x="2" y="50" width="14" height="8" rx="4" fill="#E5E7EB" />
-    <rect x="64" y="50" width="14" height="8" rx="4" fill="#E5E7EB" />
-    {/* Brush in right hand */}
-    <rect x="77" y="34" width="4" height="24" rx="2" fill="#8B5CF6" />
-    <ellipse cx="79" cy="32" rx="6" ry="4.5" fill="url(#brushG2)" />
-    <ellipse cx="79" cy="29" rx="4" ry="3" fill="#FBBF24" />
-    {/* Neck */}
-    <rect x="31" y="34" width="18" height="14" rx="4" fill="#E5E7EB" />
-    {/* Head */}
-    <rect x="8" y="0" width="64" height="38" rx="18" fill="url(#bodyG)" />
-    {/* Left eye */}
-    <circle cx="27" cy="16" r="10" fill="#1E40AF" />
-    <circle cx="27" cy="16" r="7" fill="#3B82F6" />
-    <circle cx="27" cy="16" r="4" fill="#0F172A" />
-    <circle cx="29" cy="14" r="2.5" fill="white" />
-    {/* Right eye - winking */}
-    <path d="M42 16 Q49 11 56 16" stroke="#1E40AF" strokeWidth="3.5" fill="none" strokeLinecap="round" />
-    <path d="M43 17 Q49 13 55 17" stroke="#3B82F6" strokeWidth="2" fill="none" strokeLinecap="round" />
-    {/* Smile */}
-    <path d="M24 28 Q33 35 44 28" stroke="#6B7280" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-    {/* Antenna */}
-    <rect x="37" y="-14" width="6" height="16" rx="3" fill="#8B5CF6" />
-    <circle cx="40" cy="-17" r="7" fill="#7C3AED" />
-    <circle cx="40" cy="-17" r="4" fill="#A78BFA" />
-    {/* Legs */}
-    <rect x="22" y="84" width="13" height="6" rx="3" fill="#D1D5DB" />
-    <rect x="45" y="84" width="13" height="6" rx="3" fill="#D1D5DB" />
-  </svg>
-);
+
 
 const PromptBot = ({ onUsePrompt }) => {
   const { token, isAuthenticated } = useAuth();
@@ -296,10 +249,10 @@ const PromptBot = ({ onUsePrompt }) => {
           onClick={() => setIsOpen(o => !o)}
           className={`${!isOpen ? 'bot-float glow-pulse' : ''}`}
           style={{
-            width: 68, height: 68, borderRadius: '50%',
-            background: 'linear-gradient(135deg,#6469ff,#8B5CF6)',
-            border: '3px solid rgba(255,255,255,.3)',
-            boxShadow: '0 8px 32px rgba(100,105,255,.5)',
+            width: 78, height: 78, borderRadius: '50%',
+            background: 'white',
+            border: '3px solid #8B5CF6',
+            boxShadow: '0 0 20px rgba(139,92,246,.45), 0 8px 32px rgba(100,105,255,.35)',
             cursor: 'pointer', padding: 0,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             position: 'relative', overflow: 'visible',
@@ -307,8 +260,17 @@ const PromptBot = ({ onUsePrompt }) => {
           }}
           title="Open Artzy Bot"
         >
-          <div style={{ transform: 'scale(.85)', marginTop: 4 }}>
-            <RobotAvatar size={52} />
+          <div style={{ transform: 'scale(1.2)', marginTop: 4 }}>
+            <img
+              src={artzyBot}
+              alt="Artzy Bot"
+              style={{
+                width: '100px',
+                height: '100px',
+                objectFit: 'contain',
+                borderRadius: '50%',
+              }}
+            />
           </div>
           {/* Notification dot */}
           {!isOpen && (
@@ -329,12 +291,12 @@ const PromptBot = ({ onUsePrompt }) => {
           className="slide-up"
           style={{
             position: 'fixed',
-            bottom: isMobile ? 0 : 72,
-            right: isMobile ? 0 : 24,
-            width: panelWidth,
-            height: panelHeight,
+            bottom: isMobile ? 100 : 72,
+            right: isMobile ? 10 : 24,
+            width: isMobile ? 350 : panelWidth,
+            height: isMobile ? 650 : panelHeight,
             display: 'flex', flexDirection: 'column',
-            borderRadius: isMobile ? '20px 20px 0 0' : 20,
+            borderRadius: isMobile ? 20 : 20,
             overflow: 'hidden',
             boxShadow: '0 20px 60px rgba(0,0,0,.4)',
             zIndex: 999,
@@ -353,11 +315,20 @@ const PromptBot = ({ onUsePrompt }) => {
             display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0,
           }}>
             <div style={{
-              width: 40, height: 40, borderRadius: '50%',
+              width: 50, height: 50, borderRadius: '50%',
               background: 'rgba(255,255,255,.2)', display: 'flex',
               alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0
             }}>
-              <RobotAvatar size={36} />
+              <img
+                src={artzyBot}
+                alt="Artzy Bot"
+                style={{
+                  width: '70px',
+                  height: '70px',
+                  borderRadius: '50%',
+                  objectFit: 'contain',
+                }}
+              />
             </div>
             <div style={{ flex: 1 }}>
               <p style={{ margin: 0, fontWeight: 700, fontSize: 15, color: 'white' }}>Artzy Bot</p>
@@ -464,7 +435,16 @@ const PromptBot = ({ onUsePrompt }) => {
                           background: 'linear-gradient(135deg,#6469ff,#8B5CF6)',
                           display: 'flex', alignItems: 'center', justifyContent: 'center'
                         }}>
-                          <span style={{ fontSize: 14 }}>🤖</span>
+                          <img
+                            src={artzyBot}
+                            alt="Bot"
+                            style={{
+                              width: '28px',
+                              height: '28px',
+                              borderRadius: '50%',
+                              objectFit: 'contain',
+                            }}
+                          />
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                           {/* Message text */}
@@ -573,7 +553,16 @@ const PromptBot = ({ onUsePrompt }) => {
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       flexShrink: 0
                     }}>
-                      <span style={{ fontSize: 14 }}>🤖</span>
+                      <img
+                        src={artzyBot}
+                        alt="Bot"
+                        style={{
+                          width: '28px',
+                          height: '28px',
+                          borderRadius: '50%',
+                          objectFit: 'contain',
+                        }}
+                      />
                     </div>
                     <TypingIndicator />
                   </div>

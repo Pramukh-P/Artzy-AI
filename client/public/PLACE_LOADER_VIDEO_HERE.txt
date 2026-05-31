@@ -1,4 +1,0 @@
-# Place your Loader.mp4 here
-# Path: client/public/Loader.mp4
-# This file is used as the cold-start loader animation.
-# See instructions.md Section 4 for details.
