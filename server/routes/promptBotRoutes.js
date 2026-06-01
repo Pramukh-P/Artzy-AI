@@ -3,15 +3,6 @@ import * as dotenv from 'dotenv';
 import { checkContent } from '../utils/contentFilter.js';
 import { InferenceClient } from "@huggingface/inference";
 dotenv.config();
-console.log(
-  "Gemini Key Loaded:",
-  !!process.env.GEMINI_API_KEY
-);
-
-console.log(
-  "HF Key Loaded:",
-  !!process.env.HUGGINGFACE_API_KEY
-);
 const hf = new InferenceClient(
   process.env.HUGGINGFACE_API_KEY
 );
@@ -206,11 +197,11 @@ router.post('/', async (req, res) => {
         errData
       );
 
-      const isQuotaError = true;
-        // errData?.error?.status ===
-        // "RESOURCE_EXHAUSTED"
-        // ||
-        // errData?.error?.code === 429;
+      const isQuotaError = 
+        errData?.error?.status ===
+        "RESOURCE_EXHAUSTED"
+        ||
+        errData?.error?.code === 429;
 
       if (isQuotaError) {
 
