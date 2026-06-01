@@ -1,8 +1,20 @@
 import express from 'express';
 import * as dotenv from 'dotenv';
-import { checkContent, BLOCK_MESSAGE } from '../utils/contentFilter.js';
-
+import { checkContent } from '../utils/contentFilter.js';
+import { InferenceClient } from "@huggingface/inference";
 dotenv.config();
+console.log(
+  "Gemini Key Loaded:",
+  !!process.env.GEMINI_API_KEY
+);
+
+console.log(
+  "HF Key Loaded:",
+  !!process.env.HUGGINGFACE_API_KEY
+);
+const hf = new InferenceClient(
+  process.env.HUGGINGFACE_API_KEY
+);
 const router = express.Router();
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent';
@@ -37,6 +49,74 @@ ABSOLUTE RULES never break:
 - If asked for blocked content: politely decline, briefly explain, immediately offer a creative alternative
 - Keep responses concise
 - Never ask more than 2 questions before generating`;
+
+
+const getHuggingFaceResponse = async (messages) => {
+  try {
+
+    const conversation = messages
+      .map(m => `${m.role}: ${m.content}`)
+      .join('\n');
+
+    const response =
+      await hf.chatCompletion({
+        model:
+          "Qwen/Qwen2.5-7B-Instruct",
+
+        messages: [
+          {
+            role: "system",
+            content: SYSTEM_PROMPT
+          },
+          {
+            role: "user",
+            content: conversation
+          }
+        ],
+
+        max_tokens: 500,
+        temperature: 0.7,
+      });
+
+    return (
+      response?.choices?.[0]?.message?.content ||
+      "Sorry, I couldn't generate a response."
+    );
+
+  } catch (err) {
+    console.error(
+      "HF Fallback Error:",
+      err.message
+    );
+
+    throw err;
+  }
+};
+
+// router.get("/test-hf", async (req, res) => {
+//   try {
+//     const response = await hf.chatCompletion({
+//       model: "Qwen/Qwen2.5-7B-Instruct",
+//       messages: [
+//         {
+//           role: "user",
+//           content: "Hello"
+//         }
+//       ]
+//     });
+
+//     res.json(response);
+
+//   } catch (err) {
+//     console.error("FULL HF ERROR:");
+//     console.error(err);
+
+//     res.json({
+//       message: err.message,
+//       error: err
+//     });
+//   }
+// });
 
 router.post('/', async (req, res) => {
   try {
@@ -100,10 +180,10 @@ router.post('/', async (req, res) => {
         temperature: 0.7,
       },
       safetySettings: [
-        { category: 'HARM_CATEGORY_HARASSMENT',        threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-        { category: 'HARM_CATEGORY_HATE_SPEECH',        threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-        { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',  threshold: 'BLOCK_LOW_AND_ABOVE'    },
-        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT',  threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+        { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_LOW_AND_ABOVE' },
+        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
       ],
     };
 
@@ -117,9 +197,71 @@ router.post('/', async (req, res) => {
     );
 
     if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      console.error('Gemini API error:', errData);
-      throw new Error(errData?.error?.message || 'Gemini API error');
+
+      const errData =
+        await response.json().catch(() => ({}));
+
+      console.error(
+        "Gemini API error:",
+        errData
+      );
+
+      const isQuotaError = true;
+        // errData?.error?.status ===
+        // "RESOURCE_EXHAUSTED"
+        // ||
+        // errData?.error?.code === 429;
+
+      if (isQuotaError) {
+
+        console.log(
+          "Switching from Gemini → HuggingFace"
+        );
+
+        let hfContent;
+
+        try {
+          hfContent =
+            await getHuggingFaceResponse(messages);
+        }
+        catch {
+          return res.status(200).json({
+            success: true,
+            message:
+              "🚦 Artzy Bot is temporarily busy. Please try again in a few moments.",
+            hasPrompt: false,
+            prompt: null,
+          });
+        }
+
+        const promptMatch =
+          hfContent.match(
+            /<PROMPT>([\s\S]*?)<\/PROMPT>/
+          );
+
+        const extractedPrompt =
+          promptMatch
+            ? promptMatch[1].trim()
+            : null;
+
+        const displayMessage =
+          hfContent.replace(
+            /<PROMPT>[\s\S]*?<\/PROMPT>/g,
+            ''
+          ).trim();
+
+        return res.status(200).json({
+          success: true,
+          message: displayMessage,
+          hasPrompt: !!extractedPrompt,
+          prompt: extractedPrompt,
+        });
+      }
+
+      throw new Error(
+        errData?.error?.message ||
+        "Gemini API error"
+      );
     }
 
     const data = await response.json();
@@ -152,10 +294,17 @@ router.post('/', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Prompt bot error:', error?.message || error);
-    res.status(500).json({
-      success: false,
-      message: "I'm having a little hiccup right now 😅 Please try again in a moment!",
+    console.error(
+      "Prompt bot error:",
+      error?.message || error
+    );
+
+    res.status(200).json({
+      success: true,
+      message:
+        "🚦 Artzy Bot is temporarily busy. Please try again in a few moments.",
+      hasPrompt: false,
+      prompt: null,
     });
   }
 });

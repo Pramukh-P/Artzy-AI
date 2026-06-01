@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { getInitial } from '../utils';
+import Logo from '../assets/Logo2.png';
 
 const SunIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -47,8 +48,17 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between gap-4">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 shrink-0">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#6469ff] to-[#8b5cf6] flex items-center justify-center shadow-lg">
-            <span className="text-white text-base">🎨</span>
+          <div className="w-14 h-14 rounded-xl bg-transparent flex items-center justify-center">
+            <img
+              src={Logo}
+              alt="Artzy Bot"
+              style={{
+                width: '100px',
+                height: '100px',
+                objectFit: 'contain',
+                borderRadius: '50%',
+              }}
+            />
           </div>
           <span className="text-xl font-extrabold text-gray-900 dark:text-white tracking-tight">
             Artzy<span className="text-[#6469ff]">-AI</span>

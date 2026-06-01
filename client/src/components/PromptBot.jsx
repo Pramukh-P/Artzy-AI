@@ -292,7 +292,7 @@ const PromptBot = ({ onUsePrompt }) => {
           style={{
             position: 'fixed',
             bottom: isMobile ? 100 : 72,
-            right: isMobile ? 10 : 24,
+            right: isMobile ? 18 : 24,
             width: isMobile ? 350 : panelWidth,
             height: isMobile ? 650 : panelHeight,
             display: 'flex', flexDirection: 'column',

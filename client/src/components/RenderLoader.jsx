@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import Logo from '../assets/Logo2.png';
 
 /**
  * Place your Loader.mp4 file at: client/public/Loader.mp4
@@ -124,11 +125,20 @@ const RenderLoader = () => {
         animation: 'logoFloat 3s ease-in-out infinite',
       }}>
         <div style={{
-          width: 44, height: 44, borderRadius: 14,
-          background: 'linear-gradient(135deg,#6469ff,#8B5CF6)',
+          width: 70, height: 70, borderRadius: 14,
+          background: 'transparent',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 22, boxShadow: '0 4px 20px rgba(100,105,255,.5)',
-        }}>🎨</div>
+          fontSize: 22,
+        }}><img
+              src={Logo}
+              alt="Artzy Bot"
+              style={{
+                width: '100px',
+                height: '100px',
+                objectFit: 'contain',
+                borderRadius: '50%',
+              }}
+            /></div>
         <span style={{
           fontSize: 26, fontWeight: 900, letterSpacing: '-0.5px',
           background: 'linear-gradient(90deg,#8B5CF6,#EC4899,#F97316)',

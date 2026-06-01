@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { FormField, GoogleButton, OTPInput, Loader } from '../components';
 import apiFetch from '../utils/api';
+import Logo from '../assets/Logo2.png';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -81,8 +82,17 @@ const Signup = () => {
         <div className="card-base rounded-3xl p-8 shadow-2xl">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[#6469ff] to-[#8b5cf6] mb-4 shadow-lg">
-              <span className="text-2xl">🎨</span>
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-transparent mb-4">
+              <img
+              src={Logo}
+              alt="Artzy Bot"
+              style={{
+                width: '100px',
+                height: '100px',
+                objectFit: 'contain',
+                borderRadius: '50%',
+              }}
+            />
             </div>
             <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">
               {step === 'register' ? 'Create Account' : 'Verify Email'}
