@@ -120,17 +120,55 @@ router.post('/', authMiddleware, async (req, res) => {
 router.get('/user/my', authMiddleware, async (req, res) => {
   try {
     const { filter } = req.query;
-    let query = { userId: req.user._id };
-    if (filter === 'shared') query.isPublic = true;
-    if (filter === 'private') query.isPublic = false;
 
-    const posts = await Post.find(query).sort({ createdAt: -1 });
+    let query = {
+      userId: req.user._id,
+    };
+
+    if (filter === 'shared') {
+      query.isPublic = true;
+    }
+
+    if (filter === 'private') {
+      query.isPublic = false;
+    }
+
+    const posts = await Post.find(query)
+      .sort({ createdAt: -1 });
+
+    const totalCount = await Post.countDocuments({
+      userId: req.user._id,
+    });
+
+    const sharedCount = await Post.countDocuments({
+      userId: req.user._id,
+      isPublic: true,
+    });
+
+    const privateCount = await Post.countDocuments({
+      userId: req.user._id,
+      isPublic: false,
+    });
+
     res.status(200).json({
       success: true,
-      data: posts.map((p) => formatPost(p, req.user._id)),
+
+      data: posts.map((p) =>
+        formatPost(p, req.user._id)
+      ),
+
+      counts: {
+        all: totalCount,
+        shared: sharedCount,
+        private: privateCount,
+      },
     });
+
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 });
 

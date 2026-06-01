@@ -8,7 +8,8 @@ const BLOCKED_KEYWORDS = [
   'nude', 'naked', 'nudity', 'nsfw', 'porn', 'pornographic', 'pornography',
   'explicit', 'hentai', 'erotic', 'erotica', 'xxx', 'topless', 'bottomless',
   'genitalia', 'genital', 'penis', 'vagina', 'vulva', 'anus', 'nipple',
-  'masturbat', 'orgasm', 'intercourse', 'sex scene', 'sexuali',
+  'masturbat', 'orgasm', 'intercourse', 'sex scene', 'bikini', 'boobs', 'bra',
+   'sexuali', 'thong', 'panties', 'clevage', 'sexy',
   // Child safety (absolute block)
   'child nude', 'minor nude', 'underage nude', 'loli', 'shota',
   'child porn', 'cp ', 'csam',

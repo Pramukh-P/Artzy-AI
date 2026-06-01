@@ -7,10 +7,11 @@ import apiFetch from '../utils/api';
 import { downloadImage } from '../utils';
 
 const FILTERS = [
-  { value: 'all',     label: '🖼️ All' },
-  { value: 'shared',  label: '🌐 Shared' },
+  { value: 'all', label: '🖼️ All' },
+  { value: 'shared', label: '🌐 Shared' },
   { value: 'private', label: '🔒 Private' },
 ];
+
 
 const SkeletonCard = () => (
   <div className="shimmer" style={{ borderRadius: 16, aspectRatio: '1/1' }} />
@@ -21,6 +22,11 @@ const MyCreations = () => {
   const { addToast } = useToast();
 
   const [posts, setPosts] = useState([]);
+  const [counts, setCounts] = useState({
+    all: 0,
+    shared: 0,
+    private: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [toggling, setToggling] = useState(null);
@@ -30,6 +36,14 @@ const MyCreations = () => {
     try {
       const data = await apiFetch(`/post/user/my?filter=${filter}`, {}, token);
       setPosts(data.data || []);
+
+      setCounts(
+        data.counts || {
+          all: 0,
+          shared: 0,
+          private: 0,
+        }
+      );
     } catch {
       addToast('Failed to load creations', 'error');
     } finally {
@@ -63,10 +77,11 @@ const MyCreations = () => {
     }
   };
 
-  const allCount     = posts.length;
-  const sharedCount  = posts.filter((p) => p.isPublic).length;
-  const privateCount = posts.filter((p) => !p.isPublic).length;
-  const countMap = { all: allCount, shared: sharedCount, private: privateCount };
+  const countMap = {
+    all: counts.all,
+    shared: counts.shared,
+    private: counts.private,
+  };
 
   return (
     <div className="min-h-screen pt-20 pb-12">
@@ -155,9 +170,11 @@ const MyCard = ({ post, onToggleShare, onDelete, toggling }) => {
   };
 
   return (
-    <div style={{ borderRadius: 16, overflow: 'hidden', position: 'relative',
+    <div style={{
+      borderRadius: 16, overflow: 'hidden', position: 'relative',
       boxShadow: '0 2px 12px rgba(0,0,0,.1)', background: '#fff',
-      transition: 'all .3s', cursor: 'default' }}
+      transition: 'all .3s', cursor: 'default'
+    }}
       className="dark:bg-gray-800 hover:-translate-y-0.5 hover:shadow-lg"
     >
       {/* Image */}
@@ -166,8 +183,10 @@ const MyCard = ({ post, onToggleShare, onDelete, toggling }) => {
         <img
           src={post.photo}
           alt={post.prompt}
-          style={{ width: '100%', aspectRatio: '1/1', objectFit: 'cover', display: 'block',
-            opacity: imgLoaded ? 1 : 0, transition: 'opacity .4s' }}
+          style={{
+            width: '100%', aspectRatio: '1/1', objectFit: 'cover', display: 'block',
+            opacity: imgLoaded ? 1 : 0, transition: 'opacity .4s'
+          }}
           loading="lazy"
           onLoad={() => setImgLoaded(true)}
         />
@@ -195,7 +214,8 @@ const MyCard = ({ post, onToggleShare, onDelete, toggling }) => {
       )}
 
       {/* Hover overlay */}
-      <div style={{ position: 'absolute', inset: 0,
+      <div style={{
+        position: 'absolute', inset: 0,
         background: 'linear-gradient(to top, rgba(10,10,20,.9) 0%, transparent 60%)',
         opacity: 0, transition: 'opacity .25s',
         display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 10,
@@ -203,9 +223,11 @@ const MyCard = ({ post, onToggleShare, onDelete, toggling }) => {
         onMouseEnter={e => e.currentTarget.style.opacity = 1}
         onMouseLeave={e => e.currentTarget.style.opacity = 0}
       >
-        <p style={{ color: 'white', fontSize: 11, lineHeight: 1.4, marginBottom: 8,
+        <p style={{
+          color: 'white', fontSize: 11, lineHeight: 1.4, marginBottom: 8,
           overflow: 'hidden', display: '-webkit-box',
-          WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{post.prompt}</p>
+          WebkitLineClamp: 2, WebkitBoxOrient: 'vertical'
+        }}>{post.prompt}</p>
 
         <div style={{ display: 'flex', gap: 5 }}>
           {/* Share/Unshare */}
@@ -224,18 +246,22 @@ const MyCard = ({ post, onToggleShare, onDelete, toggling }) => {
 
           {/* Download */}
           <button onClick={handleDownload} title="Download"
-            style={{ width: 32, height: 32, borderRadius: 8, border: 'none', cursor: 'pointer',
+            style={{
+              width: 32, height: 32, borderRadius: 8, border: 'none', cursor: 'pointer',
               background: 'rgba(255,255,255,.25)', color: 'white',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>
+              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14
+            }}>
             ⬇️
           </button>
 
           {/* Delete */}
           <button onClick={() => onDelete(post._id)} title="Delete"
-            style={{ width: 32, height: 32, borderRadius: 8, border: 'none', cursor: 'pointer',
+            style={{
+              width: 32, height: 32, borderRadius: 8, border: 'none', cursor: 'pointer',
               background: 'rgba(239,68,68,.5)', color: 'white',
               display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14,
-              transition: 'background .2s' }}
+              transition: 'background .2s'
+            }}
             onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,.85)'}
             onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,.5)'}
           >
