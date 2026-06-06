@@ -1,17 +1,10 @@
 # 🎨 Artzy-AI
 
-> Generate stunning AI-powered images and share them with the community.
+> Artzy-AI is a modern AI image generation platform that allows users to create high-quality AI artwork using natural language prompts. Users can generate images, explore creations from the community, and share their own AI-generated masterpieces.
 
 **🌐 Live Demo → [artzy-ai.netlify.app](https://artzy-ai.netlify.app)**
 
-![React](https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react)
-![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=flat&logo=node.js)
-![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=flat&logo=mongodb)
-![License](https://img.shields.io/badge/License-MIT-blue?style=flat)
-
 ---
-## 🎥 Project Demo
-
 ## 🎥 Project Demo
 
 <p align="center">
@@ -20,25 +13,13 @@
 
 ---
 
-## 📸 Screenshots
-
-<p align="center">
-  <img src="./screenshots/Artzy0.png" alt="Login" width="30%">
-  <img src="./screenshots/Artzy1.png" alt="Home" width="30%">
-  <img src="./screenshots/Artzy2.png" alt="Community" width="30%">
-</p>
-
-<p align="center">
-  <img src="./screenshots/Artzy3.png" alt="Prompt Bot" width="30%">
-</p>
-
 ## ✨ Features
 
 - 🖼️ **AI Image Generation** — Stable Diffusion XL via HuggingFace
-- 🤖 **Artzy Bot** — AI chat assistant to craft perfect prompts (Google Gemini, free)
-- ❤️ **Likes & Community Showcase** — Browse, like, and share AI art publicly
 - 🔐 **Auth** — Email/password with OTP verification + Google OAuth
+- 🤖 **Artzy Bot** — AI chat assistant to craft perfect prompts (Google Gemini, free)
 - 📊 **Weekly Quota** — 10 free image generations per week per user
+- ❤️ **Likes & Community Showcase** — Browse, like, and share AI art publicly
 - 🌙 **Dark / Light Mode** — System preference aware
 - 📱 **Fully Responsive** — Works on all screen sizes
 - 🛡️ **Content Moderation** — Blocks inappropriate prompts automatically
@@ -51,11 +32,11 @@
 |---|---|
 | Frontend | React 18, Vite, TailwindCSS |
 | Backend | Node.js, Express, MongoDB |
+| Auth | JWT + Passport.js Google OAuth |
 | AI Images | HuggingFace (SDXL) |
 | AI Prompts | Google Gemini 1.5 Flash (free) |
 | Image CDN | Cloudinary |
 | Email | Brevo (OTP & welcome emails) |
-| Auth | JWT + Passport.js Google OAuth |
 | Deploy | Netlify (frontend) + Render (backend) |
 
 ---
@@ -65,7 +46,7 @@
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/yourusername/artzy-ai.git
+git clone https://github.com/Pramukh-P/Artzy-AI.git
 cd artzy-ai
 ```
 
@@ -141,19 +122,6 @@ GEMINI_API_KEY=               # FREE at aistudio.google.com/app/apikey
 VITE_API_URL=http://localhost:8080
 ```
 
-**All services have free tiers — no credit card required.**
-
-| Service | Get it here |
-|---|---|
-| MongoDB Atlas | mongodb.com/atlas |
-| HuggingFace | huggingface.co → Settings → Tokens |
-| Cloudinary | cloudinary.com |
-| Brevo | brevo.com |
-| Google OAuth | console.cloud.google.com |
-| Gemini (Artzy Bot) | aistudio.google.com/app/apikey |
-
----
-
 ## 📦 Project Structure
 
 ```
@@ -174,18 +142,6 @@ artzy-ai/
 
 ---
 
-## 🎬 Cold Start Loader
-
-This app runs on Render's free tier which **sleeps after 15 min of inactivity**.
-
-To handle this gracefully, place your `Loader.mp4` in `client/public/`:
-```
-client/public/Loader.mp4
-```
-The loader plays your video in a loop until the server wakes up (~30–60 sec), then loads the app automatically.
-
----
-
 ## 🌍 Deploy
 
 | Platform | Service | Config |
@@ -198,6 +154,10 @@ Set `FRONTEND_URL` to your Netlify URL on Render.
 
 ---
 
-## 📝 License
+## 👨‍💻 Author
 
-MIT © 2025 Artzy-AI
+Pramukh P
+
+---
+
+⭐ If you like this project, don't forget to star the repository.
