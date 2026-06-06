@@ -5,7 +5,7 @@
 <h1 align="center">Artzy-AI</h1>
 
 <p align="center">
-  **🌐 Live Demo → [artzy-ai.netlify.app](https://artzy-ai.netlify.app)**
+  🌐 Live Demo → https://artzy-ai.netlify.app
 </p>
 
 <p align="center">
