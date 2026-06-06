@@ -10,6 +10,31 @@
 ![License](https://img.shields.io/badge/License-MIT-blue?style=flat)
 
 ---
+## 🎥 Project Demo
+
+<table>
+<tr>
+<td width="20%">
+<img src="./screenshots/Artzy.gif" alt="Demo">
+</td>
+
+<td width="20%">
+<img src="./screenshots/Artzy0.png" alt="login">
+</td>
+
+<td width="20%">
+<img src="./screenshots/Artzy1.png" alt="home">
+</td>
+
+<td width="20%">
+<img src="./screenshots/Artzy2.png" alt="Community">
+</td>
+
+<td width="20%">
+<img src="./screenshots/Artzy3.png" alt="Prompt Bot">
+</td>
+</tr>
+</table>
 
 ## ✨ Features
 
