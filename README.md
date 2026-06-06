@@ -12,29 +12,25 @@
 ---
 ## 🎥 Project Demo
 
-<table>
-<tr>
-<td width="20%">
-<img src="./screenshots/Artzy.gif" alt="Demo">
-</td>
+## 🎥 Project Demo
 
-<td width="20%">
-<img src="./screenshots/Artzy0.png" alt="login">
-</td>
+<p align="center">
+  <img src="./screenshots/Atrzy.gif" alt="Artzy-AI Demo" width="900">
+</p>
 
-<td width="20%">
-<img src="./screenshots/Artzy1.png" alt="home">
-</td>
+---
 
-<td width="20%">
-<img src="./screenshots/Artzy2.png" alt="Community">
-</td>
+## 📸 Screenshots
 
-<td width="20%">
-<img src="./screenshots/Artzy3.png" alt="Prompt Bot">
-</td>
-</tr>
-</table>
+<p align="center">
+  <img src="./screenshots/Artzy0.png" alt="Login" width="30%">
+  <img src="./screenshots/Artzy1.png" alt="Home" width="30%">
+  <img src="./screenshots/Artzy2.png" alt="Community" width="30%">
+</p>
+
+<p align="center">
+  <img src="./screenshots/Artzy3.png" alt="Prompt Bot" width="30%">
+</p>
 
 ## ✨ Features
 
