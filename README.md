@@ -98,6 +98,7 @@ MONGODB_URL=                  # MongoDB Atlas connection string
 JWT_SECRET=                   # Any random 32+ char string
 
 HF_TOKEN=                     # HuggingFace API token (free)
+HUGGINGFACE_API_KEY=          # Use the same HuggingFace key for both
 
 CLOUDINARY_CLOUD_NAME=        # Cloudinary dashboard
 CLOUDINARY_API_KEY=
