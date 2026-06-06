@@ -18,11 +18,7 @@
   <img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square"/>
 </p>
 
----
-
-> Artzy-AI is a full-stack AI image generation platform where users create high-quality artwork using natural language prompts, explore community creations, like and share their favourites — all with a free weekly quota.
-
----
+Artzy-AI is a full-stack AI image generation platform where users create high-quality artwork using natural language prompts, explore community creations, like and share their favourites — all with a free weekly quota.
 
 ## 🎥 Project Demo
 
@@ -30,7 +26,6 @@
   <img src="./screenshots/Atrzy.gif" alt="Artzy-AI Demo" width="900"/>
 </p>
 
----
 ## 🎯 Key Highlights
 
 - Built a complete full-stack AI SaaS application
@@ -244,7 +239,5 @@ Open a Pull Request after pushing your changes.
 **Pramukh P** 
 
 [GitHub](https://github.com/Pramukh-P)
-
----
 
 <p align="center">⭐ If you like this project, please star the repository — it helps a lot!</p>
