@@ -1,15 +1,11 @@
 <p align="center">
-  <img src="./screenshots/Logo2.png" alt="Artzy-AI Logo" width="180"/>
+  <img src="./screenshots/Logo2.png" alt="Artzy-AI Logo" width="100"/>
 </p>
 
 <h1 align="center">Artzy-AI</h1>
 
 <p align="center">
-  <em>Where imagination meets machine intelligence.</em>
-</p>
-
-<p align="center">
-  <a href="https://artzy-ai.netlify.app"><img src="https://img.shields.io/badge/🌐 Live Demo-artzy--ai.netlify.app-6469ff?style=for-the-badge" alt="Live Demo"/></a>
+  **🌐 Live Demo → [artzy-ai.netlify.app](https://artzy-ai.netlify.app)**
 </p>
 
 <p align="center">
@@ -31,21 +27,21 @@
 ## 🎥 Project Demo
 
 <p align="center">
-  <img src="./screenshots/Atrzy-AI.gif" alt="Artzy-AI Demo" width="900"/>
+  <img src="./screenshots/Atrzy.gif" alt="Artzy-AI Demo" width="900"/>
 </p>
 
 ---
 ## 🎯 Key Highlights
 
-Built a complete full-stack AI SaaS application
-Integrated Stable Diffusion XL for AI image generation
-Developed Artzy Bot using Gemini 2.5 Flash with HuggingFace Qwen fallback
-Implemented Google OAuth and Email OTP authentication
-Added weekly generation quota system
-Integrated Cloudinary for secure image storage
-Developed community sharing and engagement features
-Built responsive UI supporting desktop, tablet, and mobile devices
-Implemented AI content moderation and safety checks
+- Built a complete full-stack AI SaaS application
+- Integrated Stable Diffusion XL for AI image generation
+- Developed Artzy Bot using Gemini 2.5 Flash with HuggingFace Qwen fallback
+- Implemented Google OAuth and Email OTP authentication
+- Added weekly generation quota system
+- Integrated Cloudinary for secure image storage
+- Developed community sharing and engagement features
+- Built responsive UI supporting desktop, tablet, and mobile devices
+- Implemented AI content moderation and safety checks
 
 ---
 
