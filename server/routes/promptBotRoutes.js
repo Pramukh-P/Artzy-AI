@@ -4,7 +4,7 @@ import { checkContent } from '../utils/contentFilter.js';
 import { InferenceClient } from "@huggingface/inference";
 dotenv.config();
 const hf = new InferenceClient(
-  process.env.HF_TOKEN
+  process.env.HUGGINGFACE_API_KEY
 );
 const router = express.Router();
 
